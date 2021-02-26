@@ -51,7 +51,7 @@ fn main() {
     };
 
     el.run(move |event, _, control_flow| {
-        println!("{:?}", event);
+        // println!("{:?}", event);
         *control_flow = ControlFlow::Wait;
 
         match event {

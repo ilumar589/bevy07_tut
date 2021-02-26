@@ -13,6 +13,7 @@ pub unsafe fn triangle_with_color_attributes() -> GLuint {
     let (mut vbo, mut vao) = (0, 0);
     gl::GenVertexArrays(1, &mut vao);
     gl::GenBuffers(1, &mut vbo);
+    gl::BindVertexArray(vao);
     gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
     gl::BufferData(gl::ARRAY_BUFFER,
                    (vertices.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
@@ -30,7 +31,7 @@ pub unsafe fn triangle_with_color_attributes() -> GLuint {
                             gl::FLOAT,
                             gl::FALSE,
                             6 * mem::size_of::<GLfloat>() as GLsizei,
-                            &vertices[6] as *const f32 as *const c_void);
+                            (3 * mem::size_of::<GLfloat>()) as *const c_void);
     gl::EnableVertexAttribArray(1);
 
     gl::BindBuffer(gl::ARRAY_BUFFER, 0);
