@@ -1,11 +1,33 @@
 use gl::types;
 use std::{fs, ptr};
 use std::ffi::CString;
-use gl::types::{GLint, GLchar};
+use gl::types::{GLint, GLchar, GLfloat};
 use std::str::from_utf8;
 
+#[derive(Copy, Clone)]
 pub struct ShaderProgram {
-    pub id: types::GLuint
+    id: types::GLuint
+}
+
+impl ShaderProgram {
+    pub unsafe fn use_program(&self) {
+        gl::UseProgram(self.id);
+    }
+
+    pub unsafe fn set_bool(&self, name: &str, value: bool) {
+        let c_name = CString::new(name).unwrap();
+        gl::Uniform1i(gl::GetUniformLocation(self.id, c_name.as_ptr() as *const GLchar), value as GLint)
+    }
+
+    pub unsafe fn set_int(&self, name: &str, value: u64) {
+        let c_name = CString::new(name).unwrap();
+        gl::Uniform1i(gl::GetUniformLocation(self.id, c_name.as_ptr() as *const GLchar), value as GLint);
+    }
+
+    pub unsafe fn set_float(&self, name: &str, value: f64) {
+        let c_name = CString::new(name).unwrap();
+        gl::Uniform1f(gl::GetUniformLocation(self.id, c_name.as_ptr()), value as GLfloat);
+    }
 }
 
 impl ShaderProgram {

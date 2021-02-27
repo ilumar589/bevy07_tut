@@ -71,7 +71,7 @@ fn main() {
                 gl::ClearColor(0.2, 0.3, 0.3, 1.0);
                 gl::Clear(gl::COLOR_BUFFER_BIT);
 
-                gl::UseProgram(shader_program.id);
+                shader_program.use_program();
                 gl::BindVertexArray(vao);
                 gl::DrawArrays(gl::TRIANGLES, 0, 6);
 
