@@ -41,13 +41,13 @@ fn main() {
     gl::load_with(|address| windowed_context.get_proc_address(address) as *const _);
 
 
-    let (shader_program, vao) = unsafe {
-        let shader_program = ShaderProgram::create_from_shader_paths("resources/shaders/vertex_with_color.glsl",
-                                                                     "resources/shaders/fragment_with_color.glsl");
+    let (shader_program, vbo, vao, ebo, texture) = unsafe {
+        let shader_program = ShaderProgram::create_from_shader_paths("resources/shaders/vertex_with_texture.glsl",
+                                                                     "resources/shaders/fragment_with_texture.glsl");
 
-        let vao = examples::triangle_with_color_attributes();
+        let data = examples::triangle_with_texture();
 
-        (shader_program, vao)
+        (shader_program, data.0, data.1, data.2, data.3)
     };
 
     el.run(move |event, _, control_flow| {
@@ -71,13 +71,21 @@ fn main() {
                 gl::ClearColor(0.2, 0.3, 0.3, 1.0);
                 gl::Clear(gl::COLOR_BUFFER_BIT);
 
+                gl::BindTexture(gl::TEXTURE_2D,texture);
+
                 shader_program.use_program();
                 gl::BindVertexArray(vao);
-                gl::DrawArrays(gl::TRIANGLES, 0, 6);
+                gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, ptr::null());
 
                 windowed_context.swap_buffers().unwrap();
             }
             _ => (),
         }
     });
+
+    unsafe {
+        gl::DeleteVertexArrays(1, &vao);
+        gl::DeleteBuffers(1, &vbo);
+        gl::DeleteBuffers(1, &ebo);
+    }
 }
