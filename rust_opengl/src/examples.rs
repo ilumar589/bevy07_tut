@@ -132,7 +132,7 @@ pub unsafe fn learn_open_gl_coordinate_systems_example() -> (ShaderProgram, GLui
        -0.5f32,  0.5f32, 0.0f32,  0.0f32, 1.0f32  // top left
     ];
 
-    let indices: [u8; 6] = [
+    let indices: [i32; 6] = [
         0, 1, 3, // first triangle
         1, 2, 3  // second triangle
     ];
@@ -153,7 +153,7 @@ pub unsafe fn learn_open_gl_coordinate_systems_example() -> (ShaderProgram, GLui
     gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, ebo);
     gl::BufferData(gl::ELEMENT_ARRAY_BUFFER,
                    (indices.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
-                   &indices[0] as *const u8 as *const c_void,
+                   &indices[0] as *const i32 as *const c_void,
                    gl::STATIC_DRAW);
 
     let stride = 5 * mem::size_of::<GLfloat>() as GLsizei;
