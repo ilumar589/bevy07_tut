@@ -6,7 +6,7 @@ use std::str::from_utf8;
 
 #[derive(Copy, Clone)]
 pub struct ShaderProgram {
-    id: types::GLuint
+    pub id: types::GLuint
 }
 
 impl ShaderProgram {
@@ -27,6 +27,51 @@ impl ShaderProgram {
     pub unsafe fn set_float(&self, name: &str, value: f64) {
         let c_name = CString::new(name).unwrap();
         gl::Uniform1f(gl::GetUniformLocation(self.id, c_name.as_ptr()), value as GLfloat);
+    }
+
+    pub unsafe fn set_vec2(&self, name: &str, value: &nalgebra_glm::TVec2<f32>) {
+        let c_name = CString::new(name).unwrap();
+        gl::Uniform2fv(gl::GetUniformLocation(self.id, c_name.as_ptr() as *const GLchar), 1, value.as_ptr() as *const GLfloat);
+    }
+
+    pub unsafe fn set_vec2f(&self, name: &str, x: f32, y: f32) {
+        let c_name = CString::new(name).unwrap();
+        gl::Uniform2f(gl::GetUniformLocation(self.id, c_name.as_ptr() as *const GLchar), x, y);
+    }
+
+    pub unsafe fn set_vec3(&self, name: &str, value: &nalgebra_glm::TVec3<f32>) {
+        let c_name = CString::new(name).unwrap();
+        gl::Uniform3fv(gl::GetUniformLocation(self.id, c_name.as_ptr() as *const GLchar), 1, value.as_ptr() as *const GLfloat);
+    }
+
+    pub unsafe fn set_vec3f(&self, name: &str, x: f32, y: f32, z: f32) {
+        let c_name = CString::new(name).unwrap();
+        gl::Uniform3f(gl::GetUniformLocation(self.id, c_name.as_ptr() as *const GLchar), x, y, z);
+    }
+
+    pub unsafe fn set_vec4(&self, name: &str, value: &nalgebra_glm::TVec4<f32>) {
+        let c_name = CString::new(name).unwrap();
+        gl::Uniform4fv(gl::GetUniformLocation(self.id, c_name.as_ptr() as *const GLchar), 1, value.as_ptr() as *const GLfloat);
+    }
+
+    pub unsafe fn set_vec4f(&self, name: &str, x: f32, y: f32, z: f32, w: f32) {
+        let c_name = CString::new(name).unwrap();
+        gl::Uniform4f(gl::GetUniformLocation(self.id, c_name.as_ptr() as *const GLchar), x, y, z, w);
+    }
+
+    pub unsafe fn set_mat2(&self, name: &str, value: &nalgebra_glm::TMat2<f32>) {
+        let c_name = CString::new(name).unwrap();
+        gl::UniformMatrix2fv(gl::GetUniformLocation(self.id, c_name.as_ptr() as *const GLchar), 1, gl::FALSE, value.as_ptr() as *const GLfloat);
+    }
+
+    pub unsafe fn set_mat3(&self, name: &str, value: &nalgebra_glm::TMat3<f32>) {
+        let c_name = CString::new(name).unwrap();
+        gl::UniformMatrix3fv(gl::GetUniformLocation(self.id, c_name.as_ptr() as *const GLchar), 1, gl::FALSE, value.as_ptr() as *const GLfloat);
+    }
+
+    pub unsafe fn set_mat4(&self, name: &str, value: &nalgebra_glm::TMat4<f32>) {
+        let c_name = CString::new(name).unwrap();
+        gl::UniformMatrix4fv(gl::GetUniformLocation(self.id, c_name.as_ptr() as *const GLchar), 1, gl::FALSE, value.as_ptr() as *const GLfloat);
     }
 }
 
