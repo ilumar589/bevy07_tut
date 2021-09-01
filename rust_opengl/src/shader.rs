@@ -86,7 +86,7 @@ impl ShaderProgram {
         // check for shader compile errors
         let mut success = gl::FALSE as GLint;
         let mut info_log = Vec::with_capacity(512);
-        info_log.set_len(512 - 1); // subtract 1 to skip the trailing null character
+        info_log.set_len(511); // subtract 1 to skip the trailing null character
 
         gl::GetShaderiv(vertex_shader_id, gl::COMPILE_STATUS, &mut success);
         if success != gl::TRUE as GLint {

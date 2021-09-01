@@ -1,4 +1,4 @@
-use crate::file_utils::read_file_contents;
+use crate::utils::read_file_contents;
 use std::fs::File;
 
 

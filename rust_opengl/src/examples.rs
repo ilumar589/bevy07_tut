@@ -5,6 +5,7 @@ use std::path::Path;
 use image::GenericImageView;
 use image::io::Reader as ImageReader;
 use crate::shader::ShaderProgram;
+use crate::utils::gl_check_error;
 
 pub unsafe fn triangle_with_texture() -> (u32, u32, u32, u32) {
     let vertices: [f32; 32] = [
@@ -124,7 +125,7 @@ pub unsafe fn learn_open_gl_coordinate_systems_example() -> (ShaderProgram, GLui
 
     // set up vertex data and configure attributes
 
-    let vertices: [f32; 20] = [
+    let vertices= [
         // positions             // texture coordinates
         0.5f32,  0.5f32, 0.0f32,  1.0f32, 1.0f32, // top right
         0.5f32, -0.5f32, 0.0f32,  1.0f32, 0.0f32, // bottom right
@@ -132,7 +133,7 @@ pub unsafe fn learn_open_gl_coordinate_systems_example() -> (ShaderProgram, GLui
        -0.5f32,  0.5f32, 0.0f32,  0.0f32, 1.0f32  // top left
     ];
 
-    let indices: [i32; 6] = [
+    let indices = [
         0, 1, 3, // first triangle
         1, 2, 3  // second triangle
     ];
@@ -176,8 +177,25 @@ pub unsafe fn learn_open_gl_coordinate_systems_example() -> (ShaderProgram, GLui
     gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as i32);
     gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
     // load image, create texture and generate mipmaps
-    let img = ImageReader::open("resources/textures/brickwally.jpg").unwrap().decode().unwrap();
+    let img = ImageReader::open("resources/textures/brickwally.jpg").unwrap().decode().unwrap().flipv();
     let image_data = img.to_bytes();
+
+    // try with stbi bindings
+    // let img = stb_image::image::load("resources/textures/brickwally.jpg");
+    //
+    // let img = match img {
+    //     stb_image::image::LoadResult::Error(error_message) => {
+    //         println!("Error loading image: {}", error_message);
+    //     },
+    //     stb_image::image::LoadResult::ImageU8(u8_image) => {
+    //         u8_image
+    //     },
+    //     stb_image::image::LoadResult::ImageF32(f32_image) => {
+    //         f32_image
+    //     }
+    // };
+
+
     gl::TexImage2D(gl::TEXTURE_2D,
                    0,
                    gl::RGB as i32,
@@ -187,6 +205,8 @@ pub unsafe fn learn_open_gl_coordinate_systems_example() -> (ShaderProgram, GLui
                    gl::RGB,
                    gl::UNSIGNED_BYTE,
                    &image_data[0] as *const u8 as *const c_void);
+    gl_check_error(file!(), line!());
+
     gl::GenerateMipmap(gl::TEXTURE_2D);
 
     let mut texture2 = 0;
@@ -210,6 +230,7 @@ pub unsafe fn learn_open_gl_coordinate_systems_example() -> (ShaderProgram, GLui
                    gl::RGB,
                    gl::UNSIGNED_BYTE,
                    &image_data[0] as *const u8 as *const c_void);
+    gl_check_error(file!(), line!());
     gl::GenerateMipmap(gl::TEXTURE_2D);
 
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)

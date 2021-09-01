@@ -1,7 +1,8 @@
-mod file_utils;
+mod utils;
 mod tests;
 mod shader;
 mod examples;
+mod texture;
 // mod ecs_experiments;
 
 extern crate gl;
