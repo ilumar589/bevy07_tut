@@ -6,6 +6,11 @@ use image::GenericImageView;
 use image::io::Reader as ImageReader;
 use crate::shader::ShaderProgram;
 use crate::utils::gl_check_error;
+use glutin::event::{Event, WindowEvent};
+use glutin::event_loop::{ControlFlow, EventLoop};
+use glutin::window::WindowBuilder;
+use glutin::ContextBuilder;
+use crate::texture::BasicTexture;
 
 pub unsafe fn triangle_with_texture() -> (u32, u32, u32, u32) {
     let vertices: [f32; 32] = [
@@ -116,8 +121,24 @@ pub unsafe fn triangle_with_color_attributes() -> GLuint {
     vao as GLuint
 }
 
+#[allow(non_snake_case)]
+pub unsafe fn learn_open_gl_coordinate_systems_example() {
+    let el = EventLoop::new();
+    let wb = WindowBuilder::new().with_title("A fantastic window!");
 
-pub unsafe fn learn_open_gl_coordinate_systems_example() -> (ShaderProgram, GLuint, GLuint, GLuint){
+    let windowed_context =
+        ContextBuilder::new().build_windowed(wb, &el).unwrap();
+
+    let windowed_context = unsafe { windowed_context.make_current().unwrap() };
+
+    println!(
+        "Pixel format of the window's GL context: {:?}",
+        windowed_context.get_pixel_format()
+    );
+
+    gl::load_with(|address| windowed_context.get_proc_address(address) as *const _);
+
+
     // build and compile our shader program
 
     let shader_program = ShaderProgram::create_from_shader_paths("resources/shaders/6.1.coordinate_systems_vs.glsl",
@@ -167,124 +188,72 @@ pub unsafe fn learn_open_gl_coordinate_systems_example() -> (ShaderProgram, GLui
 
     // load and create a texture
     // -------------------------
-    let mut texture = 0;
-    gl::GenTextures(1, &mut texture);
-    gl::BindTexture(gl::TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-    // set the texture wrapping parameters
-    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::REPEAT as i32); // set texture wrapping to gl::REPEAT (default wrapping method)
-    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::REPEAT as i32);
-    // set texture filtering parameters
-    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as i32);
-    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
-    // load image, create texture and generate mipmaps
-    let img = ImageReader::open("resources/textures/brickwally.jpg").unwrap().decode().unwrap().flipv();
-    let image_data = img.to_bytes();
-
-    // try with stbi bindings
-    // let img = stb_image::image::load("resources/textures/brickwally.jpg");
-    //
-    // let img = match img {
-    //     stb_image::image::LoadResult::Error(error_message) => {
-    //         println!("Error loading image: {}", error_message);
-    //     },
-    //     stb_image::image::LoadResult::ImageU8(u8_image) => {
-    //         u8_image
-    //     },
-    //     stb_image::image::LoadResult::ImageF32(f32_image) => {
-    //         f32_image
-    //     }
-    // };
-
-
-    gl::TexImage2D(gl::TEXTURE_2D,
-                   0,
-                   gl::RGB as i32,
-                   img.width() as i32,
-                   img.height() as i32,
-                   0,
-                   gl::RGB,
-                   gl::UNSIGNED_BYTE,
-                   &image_data[0] as *const u8 as *const c_void);
-    gl_check_error(file!(), line!());
-
-    gl::GenerateMipmap(gl::TEXTURE_2D);
-
-    let mut texture2 = 0;
-    gl::GenTextures(1, &mut texture2);
-    gl::BindTexture(gl::TEXTURE_2D, texture2); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-    // set the texture wrapping parameters
-    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::REPEAT as i32); // set texture wrapping to gl::REPEAT (default wrapping method)
-    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::REPEAT as i32);
-    // set texture filtering parameters
-    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as i32);
-    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
-    // load image, create texture and generate mipmaps
-    let img = ImageReader::open("resources/textures/smiley_santa.jpg").unwrap().decode().unwrap();
-    let image_data = img.to_bytes();
-    gl::TexImage2D(gl::TEXTURE_2D,
-                   0,
-                   gl::RGB as i32,
-                   img.width() as i32,
-                   img.height() as i32,
-                   0,
-                   gl::RGB,
-                   gl::UNSIGNED_BYTE,
-                   &image_data[0] as *const u8 as *const c_void);
-    gl_check_error(file!(), line!());
-    gl::GenerateMipmap(gl::TEXTURE_2D);
+    let texture_1 = BasicTexture::new("resources/textures/wall.jpg");
+    let texture_2 = BasicTexture::new("resources/textures/awesome-face.jpg");
 
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     shader_program.use_program();
     shader_program.set_int("texture1", 0);
     shader_program.set_int("texture2", 1);
 
-    (shader_program, vao as GLuint, texture as GLuint, texture2 as GLuint)
+    el.run(move |event, _, control_flow| {
+        // println!("{:?}", event);
+        *control_flow = ControlFlow::Wait;
 
-    // while (!glfwWindowShouldClose(window)) // example of while loop because this changes in the main.rs file
-    // {
-    //     // input
-    //     // -----
-    //     processInput(window);
-    //
-    //     // render
-    //     // ------
-    //     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    //     glClear(GL_COLOR_BUFFER_BIT);
-    //
-    //     // bind textures on corresponding texture units
-    //     glActiveTexture(GL_TEXTURE0);
-    //     glBindTexture(GL_TEXTURE_2D, texture1);
-    //     glActiveTexture(GL_TEXTURE1);
-    //     glBindTexture(GL_TEXTURE_2D, texture2);
-    //
-    //     // activate shader
-    //     ourShader.use();
-    //
-    //     // create transformations
-    //     glm::mat4 model         = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-    //     glm::mat4 view          = glm::mat4(1.0f);
-    //     glm::mat4 projection    = glm::mat4(1.0f);
-    //     model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    //     view  = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-    //     projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-    //     // retrieve the matrix uniform locations
-    //     unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
-    //     unsigned int viewLoc  = glGetUniformLocation(ourShader.ID, "view");
-    //     // pass them to the shaders (3 different ways)
-    //     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    //     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
-    //     // note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
-    //     ourShader.setMat4("projection", projection);
-    //
-    //     // render container
-    //     glBindVertexArray(VAO);
-    //     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    //
-    //     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-    //     // -------------------------------------------------------------------------------
-    //     glfwSwapBuffers(window);
-    //     glfwPollEvents();
-    // }
+        match event {
+            Event::LoopDestroyed => {
+                unsafe {
+                    gl::DeleteVertexArrays(1, &vao);
+                    // gl::DeleteBuffers(1, &vbo);
+                    // gl::DeleteBuffers(1, &ebo);
+                }
+            },
+            Event::WindowEvent { event, .. } => match event {
+                WindowEvent::Resized(physical_size) => {
+                    windowed_context.resize(physical_size)
+                }
+                WindowEvent::CloseRequested => {
+                    *control_flow = ControlFlow::Exit
+                }
+                _ => (),
+            },
+            Event::RedrawRequested(_) => unsafe {
+                // gl.draw_frame([1.0, 0.5, 0.7, 1.0]);
+
+                gl::ClearColor(0.2, 0.3, 0.3, 1.0);
+                gl::Clear(gl::COLOR_BUFFER_BIT);
+
+                // bind textures on corresponding texture units
+                gl::ActiveTexture(gl::TEXTURE0);
+                texture_1.bind();
+                gl::ActiveTexture(gl::TEXTURE1);
+                texture_2.bind();
+
+                // activate shader
+                shader_program.use_program();
+
+                // create transformations
+                let mut model = nalgebra_glm::identity::<f32, 4>();
+                let mut view = nalgebra_glm::identity::<f32, 4>();
+                let projection = nalgebra_glm::perspective(f32::to_radians(45f32), 800f32 / 600f32, 0.1f32, 100f32);
+
+                model = nalgebra_glm::rotate(&model, f32::to_radians(-55f32), &nalgebra_glm::vec3(1f32, 0f32, 0f32));
+                view = nalgebra_glm::translate(&view, &nalgebra_glm::vec3(0f32, 0f32, -3f32));
+
+                // pass them to the shaders
+                shader_program.set_mat4("model", &model);
+                shader_program.set_mat4("view", &view);
+                shader_program.set_mat4("projection", &projection);  // note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
+
+                // render container
+                gl::BindVertexArray(vao);
+                gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, ptr::null());
+
+                windowed_context.swap_buffers().unwrap();
+            }
+            _ => (),
+        }
+    });
 }
 
 pub unsafe fn transformation_matrices_needed_for_3d() {
