@@ -93,29 +93,30 @@ fn player_movement_system(
 ) {
     let (player, mut transform) = query.single_mut();
 
-    let mut direction_x = 0.0;
-    let mut direction_z = 0.0;
+    let translation = &mut transform.translation;
+    let mut direction = Vec3::ZERO;
 
     if keyboard_input.pressed(KeyCode::Up) {
-        direction_x -= 1.0;
+        direction.x -= 1.0;
     }
 
     if keyboard_input.pressed(KeyCode::Down) {
-        direction_x += 1.0;
+        direction.x += 1.0;
     }
 
     if keyboard_input.pressed(KeyCode::Right) {
-        direction_z -= 1.0;
+        direction.z -= 1.0;
     }
 
     if keyboard_input.pressed(KeyCode::Left) {
-        direction_z += 1.0;
+        direction.z += 1.0;
     }
 
-    let translation = &mut transform.translation;
+    // let direction = direction.normalize();
+
     // move the paddle horizontally
-    translation.x += direction_x * player.speed * TIME_STEP;
-    translation.z += direction_z * player.speed * TIME_STEP;
+    translation.x += direction.x * player.speed * TIME_STEP;
+    translation.z += direction.z * player.speed * TIME_STEP;
     // bound the paddle within the walls
     translation.x = translation.x.min(380.0).max(-380.0);
     translation.z = translation.z.min(380.0).max(-380.0);
