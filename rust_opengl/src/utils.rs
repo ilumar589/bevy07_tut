@@ -18,7 +18,3 @@ pub unsafe fn gl_check_error(file: &str, line: u32) {
 
     println!("{} | {} ({})", error_to_print, file, line);
 }
-
-pub fn read_file_contents(file_path: &str) -> String {
-    fs::read_to_string(file_path).unwrap()
-}

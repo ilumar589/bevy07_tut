@@ -12,7 +12,30 @@ use glutin::window::WindowBuilder;
 use glutin::ContextBuilder;
 use crate::texture::BasicTexture;
 
-pub unsafe fn triangle_with_texture() -> (u32, u32, u32, u32) {
+#[allow(non_snake_case)]
+pub unsafe fn triangle_with_texture() {
+    let el = EventLoop::new();
+    let wb = WindowBuilder::new().with_title("A fantastic window!");
+
+    let windowed_context =
+        ContextBuilder::new().build_windowed(wb, &el).unwrap();
+
+    let windowed_context = unsafe { windowed_context.make_current().unwrap() };
+
+    println!(
+        "Pixel format of the window's GL context: {:?}",
+        windowed_context.get_pixel_format()
+    );
+
+    gl::load_with(|address| windowed_context.get_proc_address(address) as *const _);
+
+
+    // build and compile our shader program
+
+    let shader_program = ShaderProgram::create_from_shader_paths("resources/shaders/vertex_with_texture.glsl",
+                                                                 "resources/shaders/fragment_with_texture.glsl");
+
+
     let vertices: [f32; 32] = [
         // positions       // colors        // texture coords
         0.5,  0.5, 0.0,   1.0, 0.0, 0.0,   1.0, 1.0, // top right
@@ -57,30 +80,51 @@ pub unsafe fn triangle_with_texture() -> (u32, u32, u32, u32) {
 
     // load and create a texture
     // -------------------------
-    let mut texture = 0;
-    gl::GenTextures(1, &mut texture);
-    gl::BindTexture(gl::TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-    // set the texture wrapping parameters
-    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::REPEAT as i32); // set texture wrapping to gl::REPEAT (default wrapping method)
-    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::REPEAT as i32);
-    // set texture filtering parameters
-    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as i32);
-    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
-    // load image, create texture and generate mipmaps
-    let img = ImageReader::open("resources/textures/brickwally.jpg").unwrap().decode().unwrap();
-    let image_data = img.to_bytes();
-    gl::TexImage2D(gl::TEXTURE_2D,
-                   0,
-                   gl::RGB as i32,
-                   img.width() as i32,
-                   img.height() as i32,
-                   0,
-                   gl::RGB,
-                   gl::UNSIGNED_BYTE,
-                   &image_data[0] as *const u8 as *const c_void);
-    gl::GenerateMipmap(gl::TEXTURE_2D);
+    let texture = BasicTexture::new("resources/textures/brickwally.jpg");
 
-    (vbo, vao, ebo, texture)
+    el.run(move |event, _, control_flow| {
+        // println!("{:?}", event);
+        *control_flow = ControlFlow::Wait;
+
+        match event {
+            Event::LoopDestroyed => {
+                unsafe {
+                    gl::DeleteVertexArrays(1, &vao);
+                    // gl::DeleteBuffers(1, &vbo);
+                    // gl::DeleteBuffers(1, &ebo);
+                }
+            },
+            Event::WindowEvent { event, .. } => match event {
+                WindowEvent::Resized(physical_size) => {
+                    windowed_context.resize(physical_size)
+                }
+                WindowEvent::CloseRequested => {
+                    *control_flow = ControlFlow::Exit
+                }
+                _ => (),
+            },
+            Event::RedrawRequested(_) => unsafe {
+                // gl.draw_frame([1.0, 0.5, 0.7, 1.0]);
+
+                gl::ClearColor(0.2, 0.3, 0.3, 1.0);
+                gl::Clear(gl::COLOR_BUFFER_BIT);
+
+                // bind textures on corresponding texture units
+                texture.bind();
+
+                // activate shader
+                shader_program.use_program();
+
+                // render container
+                gl::BindVertexArray(vao);
+                gl::DrawElements(gl::TRIANGLES, 3, gl::UNSIGNED_INT, ptr::null());
+
+                windowed_context.swap_buffers().unwrap();
+            }
+            _ => (),
+        }
+    });
+
 }
 
 pub unsafe fn triangle_with_color_attributes() -> GLuint {
@@ -188,8 +232,10 @@ pub unsafe fn learn_open_gl_coordinate_systems_example() {
 
     // load and create a texture
     // -------------------------
-    let texture_1 = BasicTexture::new("resources/textures/wall.jpg");
-    let texture_2 = BasicTexture::new("resources/textures/awesome-face.jpg");
+    // let texture_1 = BasicTexture::new("resources/textures/wall.jpg");
+    // let texture_2 = BasicTexture::new("resources/textures/awesome-face.jpg");
+    let texture_1 = BasicTexture::new("resources/textures/brickwally.jpg");
+    let texture_2 = BasicTexture::new("resources/textures/brickwally.jpg");
 
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     shader_program.use_program();
@@ -254,6 +300,90 @@ pub unsafe fn learn_open_gl_coordinate_systems_example() {
             _ => (),
         }
     });
+}
+
+pub unsafe fn camera() {
+    let el = EventLoop::new();
+    let wb = WindowBuilder::new().with_title("A fantastic window!");
+
+    let windowed_context =
+        ContextBuilder::new().build_windowed(wb, &el).unwrap();
+
+    let windowed_context = unsafe { windowed_context.make_current().unwrap() };
+
+    println!(
+        "Pixel format of the window's GL context: {:?}",
+        windowed_context.get_pixel_format()
+    );
+
+    gl::load_with(|address| windowed_context.get_proc_address(address) as *const _);
+
+
+    // build and compile our shader program
+
+    let shader_program = ShaderProgram::create_from_shader_paths("resources/shaders/6.1.coordinate_systems_vs.glsl",
+                                                                 "resources/shaders/6.1.coordinate_systems_fs.glsl");
+
+    // set up vertex data and configure attributes
+    let vertices: [f32; 180] = [
+        -0.5, -0.5, -0.5,  0.0, 0.0,
+        0.5, -0.5, -0.5,  1.0, 0.0,
+        0.5,  0.5, -0.5,  1.0, 1.0,
+        0.5,  0.5, -0.5,  1.0, 1.0,
+        -0.5,  0.5, -0.5,  0.0, 1.0,
+        -0.5, -0.5, -0.5,  0.0, 0.0,
+
+        -0.5, -0.5,  0.5,  0.0, 0.0,
+        0.5, -0.5,  0.5,  1.0, 0.0,
+        0.5,  0.5,  0.5,  1.0, 1.0,
+        0.5,  0.5,  0.5,  1.0, 1.0,
+        -0.5,  0.5,  0.5,  0.0, 1.0,
+        -0.5, -0.5,  0.5,  0.0, 0.0,
+
+        -0.5,  0.5,  0.5,  1.0, 0.0,
+        -0.5,  0.5, -0.5,  1.0, 1.0,
+        -0.5, -0.5, -0.5,  0.0, 1.0,
+        -0.5, -0.5, -0.5,  0.0, 1.0,
+        -0.5, -0.5,  0.5,  0.0, 0.0,
+        -0.5,  0.5,  0.5,  1.0, 0.0,
+
+        0.5,  0.5,  0.5,  1.0, 0.0,
+        0.5,  0.5, -0.5,  1.0, 1.0,
+        0.5, -0.5, -0.5,  0.0, 1.0,
+        0.5, -0.5, -0.5,  0.0, 1.0,
+        0.5, -0.5,  0.5,  0.0, 0.0,
+        0.5,  0.5,  0.5,  1.0, 0.0,
+
+        -0.5, -0.5, -0.5,  0.0, 1.0,
+        0.5, -0.5, -0.5,  1.0, 1.0,
+        0.5, -0.5,  0.5,  1.0, 0.0,
+        0.5, -0.5,  0.5,  1.0, 0.0,
+        -0.5, -0.5,  0.5,  0.0, 0.0,
+        -0.5, -0.5, -0.5,  0.0, 1.0,
+
+        -0.5,  0.5, -0.5,  0.0, 1.0,
+        0.5,  0.5, -0.5,  1.0, 1.0,
+        0.5,  0.5,  0.5,  1.0, 0.0,
+        0.5,  0.5,  0.5,  1.0, 0.0,
+        -0.5,  0.5,  0.5,  0.0, 0.0,
+        -0.5,  0.5, -0.5,  0.0, 1.0
+    ];
+
+    let cube_positions = [
+        nalgebra_glm::Vec3::new(0.0, 0.0, 0.0),
+        nalgebra_glm::Vec3::new(2.0, 5.0, -15.0),
+        nalgebra_glm::Vec3::new(-1.5, -2.2, -2.5),
+        nalgebra_glm::Vec3::new(-3.8, -2.0, -12.3),
+        nalgebra_glm::Vec3::new(2.4, -0.4, -3.5),
+        nalgebra_glm::Vec3::new(-1.7, 3.0, -7.5),
+        nalgebra_glm::Vec3::new(1.3, -2.0, -2.5),
+        nalgebra_glm::Vec3::new(1.5, 2.0, -2.5),
+        nalgebra_glm::Vec3::new(1.5, 0.2, -1.5),
+        nalgebra_glm::Vec3::new(-1.3, 1.0, -1.5),
+    ];
+
+    let mut vbo;
+    let mut vao;
 }
 
 pub unsafe fn transformation_matrices_needed_for_3d() {

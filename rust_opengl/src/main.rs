@@ -19,7 +19,7 @@ use glutin::event_loop::{ControlFlow, EventLoop};
 use glutin::window::WindowBuilder;
 use glutin::ContextBuilder;
 use crate::shader::ShaderProgram;
-use crate::examples::learn_open_gl_coordinate_systems_example;
+use crate::examples::{learn_open_gl_coordinate_systems_example, triangle_with_texture};
 
 
 // settings
@@ -28,6 +28,7 @@ const SCR_HEIGHT: u32 = 600;
 
 fn main() {
     unsafe {
+        // triangle_with_texture();
         learn_open_gl_coordinate_systems_example();
     }
 }
