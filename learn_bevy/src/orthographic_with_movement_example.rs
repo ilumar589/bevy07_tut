@@ -1,6 +1,6 @@
 use bevy::core::FixedTimestep;
 use bevy::prelude::{Assets, Color, Commands, Mesh, Msaa, OrthographicCameraBundle, PbrBundle, Plugin, PointLightBundle, ResMut, shape, StandardMaterial, Vec3, Component, Res, Input, KeyCode, Query, SystemSet, AssetServer, BuildChildren, SpawnSceneAsChildCommands};
-use crate::{App, PerspectiveCameraBundle, Transform};
+use crate::{App, Transform};
 
 pub struct OrthographicMovementExamplePlugin;
 
@@ -39,8 +39,8 @@ fn setup(
     assets: Res<AssetServer>
 ) {
     // set up camera
-    let mut camera = PerspectiveCameraBundle::new_3d();
-    // camera.orthographic_projection.scale = 3.0;
+    let mut camera = OrthographicCameraBundle::new_3d();
+    camera.orthographic_projection.scale = 3.0;
     camera.transform = Transform::from_xyz(5.0, 5.0, 5.0).looking_at(Vec3::ZERO, Vec3::Y);
 
     // camera
