@@ -14,6 +14,12 @@ use crate::snake_clone_example::SnakeClonePlugin;
 
 fn main() {
     App::new()
+        .insert_resource(WindowDescriptor { // <--
+            title: "Snake!".to_string(), // <--
+            width: 500.0,                 // <--
+            height: 500.0,                // <--
+            ..Default::default()         // <--
+        })
         .add_plugins(DefaultPlugins)
         // .add_plugin(GltfLoadExamplePlugin)
         // .add_plugin(OrthographicExamplePlugin)
