@@ -8,6 +8,7 @@ use components::{
 use enemy::EnemyPlugin;
 use player::PlayerPlugin;
 use std::collections::HashSet;
+use std::os::unix::raw::time_t;
 
 mod components;
 mod player;
@@ -29,7 +30,8 @@ const EXPLOSION_SHEET: &str = "explo_a_sheet.png";
 const EXPLOSION_LENGTH: usize = 16;
 
 const SPRITE_SCALE: f32 = 0.5;
-const MAX_ENEMIES: u32 = 10;
+const MAX_ENEMIES: u32 = 2;
+const PLAYER_RESPAWN_DELAY: f64 = 2.;
 
 // end region: --- Asset Constants
 
@@ -49,6 +51,32 @@ struct GameTextures {
 }
 
 struct EnemyCount(u32);
+
+struct PlayerState {
+    on: bool,       // alive
+    last_shot: f64  // -1 if not shot
+}
+
+impl Default for PlayerState {
+    fn default() -> Self {
+        Self {
+            on: false,
+            last_shot: -1.
+        }
+    }
+}
+
+impl PlayerState {
+    pub fn shot(&mut self, time: f64) {
+        self.on = false;
+        self.last_shot = time;
+    }
+
+    pub fn spawned(&mut self) {
+        self.on = true;
+        self.last_shot = -1.
+    }
+}
 
 // end region: --- Resources
 
@@ -76,6 +104,7 @@ fn main() {
         .add_system(player_laser_hit_system)
         .add_system(explosion_to_spawn_system)
         .add_system(explosion_animation_system)
+        .add_system(enemy_laser_hit_player_system)
         .run();
 }
 
@@ -175,6 +204,38 @@ fn player_laser_hit_system(
                 despawned_entities.insert(laser_entity);
 
                 commands.spawn().insert(ExplosionToSpawn(enemy_transform.translation.clone()));
+            }
+        }
+    }
+}
+
+fn enemy_laser_hit_player_system(
+    mut commands: Commands,
+    mut player_state: ResMut<PlayerState>,
+    time: Res<Time>,
+    laser_query: Query<(Entity, &Transform, &SpriteSize), (With<Laser>, With<FromEnemy>)>,
+    player_query: Query<(Entity, &Transform, &SpriteSize), With<Player>>
+) {
+    if let Ok((player_entity, player_transform, player_size)) = player_query.get_single() {
+        let player_scale = Vec2::from(player_transform.scale.xy());
+
+        for (laser_entity, laser_transform, laser_size) in laser_query.iter() {
+            let laser_scale = Vec2::from(laser_transform.scale.xy());
+
+            let collision = collide(
+              laser_transform.translation,
+                laser_size.0 * laser_scale,
+                player_transform.translation,
+                player_size.0 * player_scale
+            );
+
+            if let Some(_) =  collision {
+                commands.entity(player_entity).despawn();
+                player_state.shot(time.seconds_since_startup());
+                commands.entity(laser_entity).despawn();
+                commands.spawn().insert(ExplosionToSpawn(player_transform.translation.clone()));
+
+                break;
             }
         }
     }
