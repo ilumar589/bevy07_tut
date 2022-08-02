@@ -17,8 +17,6 @@ fn enemy_spawn_bundle(
     win_size: Res<WinSize>
 ) {
 
-    println!("->>> Here");
-
     // compute x/y
     let  mut rng = thread_rng();
     let w_span = win_size.w / 2. -100.;
