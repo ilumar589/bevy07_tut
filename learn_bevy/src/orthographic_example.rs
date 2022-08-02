@@ -1,3 +1,4 @@
+use bevy::DefaultPlugins;
 use bevy::prelude::{Assets, Color, Commands, Mesh, Msaa, OrthographicCameraBundle, PbrBundle, Plugin, PointLightBundle, ResMut, shape, StandardMaterial, Vec3};
 use crate::{App, Transform};
 
@@ -6,6 +7,7 @@ pub struct OrthographicExamplePlugin;
 impl Plugin for OrthographicExamplePlugin {
     fn build(&self, app: &mut App) {
         app
+            .add_plugins(DefaultPlugins)
             .insert_resource(Msaa { samples: 4 })
             .add_startup_system(setup);
     }

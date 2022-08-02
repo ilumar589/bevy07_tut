@@ -1,7 +1,7 @@
 use bytemuck::Zeroable;
 use image::GenericImageView;
 use wgpu::util::DeviceExt;
-use wgpu::{SurfaceError, SurfaceTexture};
+use wgpu::{PowerPreference, SurfaceError, SurfaceTexture};
 use winit::dpi::PhysicalPosition;
 use winit::window::Window;
 use winit::{
@@ -9,7 +9,6 @@ use winit::{
     event_loop::{ControlFlow, EventLoop},
     window::WindowBuilder,
 };
-use winit::window::CursorIcon::Default;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
@@ -78,7 +77,7 @@ impl State {
         let instance = wgpu::Instance::new(wgpu::Backends::all());
         let surface = unsafe { instance.create_surface(window) };
         let request_adapter_options = wgpu::RequestAdapterOptions {
-            power_preference: Default::default(),
+            power_preference: PowerPreference::LowPower,
             force_fallback_adapter: false,
             compatible_surface: Some(&surface),
         };

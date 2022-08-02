@@ -8,6 +8,7 @@ pub struct BreakoutGameExamplePlugin;
 impl Plugin for BreakoutGameExamplePlugin {
     fn build(&self, app: &mut App) {
        app
+           .add_plugins(DefaultPlugins)
            .insert_resource(Scoreboard { score: 0 })
            .insert_resource(ClearColor(Color::rgb(0.9, 0.9, 0.9)))
            .add_startup_system(setup)

@@ -1,4 +1,5 @@
 use bevy::core::FixedTimestep;
+use bevy::DefaultPlugins;
 use bevy::prelude::{Assets, Color, Commands, Mesh, Msaa, OrthographicCameraBundle, PbrBundle, Plugin, PointLightBundle, ResMut, shape, StandardMaterial, Vec3, Component, Res, Input, KeyCode, Query, SystemSet, AssetServer, BuildChildren, SpawnSceneAsChildCommands};
 use crate::{App, Transform};
 
@@ -7,6 +8,7 @@ pub struct OrthographicMovementExamplePlugin;
 impl Plugin for OrthographicMovementExamplePlugin {
     fn build(&self, app: &mut App) {
         app
+            .add_plugins(DefaultPlugins)
             .insert_resource(Msaa { samples: 4 })
             .add_startup_system(setup)
             .add_system_set(

@@ -369,21 +369,21 @@ pub unsafe fn camera() {
         -0.5,  0.5, -0.5,  0.0, 1.0
     ];
 
-    let cube_positions = [
-        nalgebra_glm::Vec3::new(0.0, 0.0, 0.0),
-        nalgebra_glm::Vec3::new(2.0, 5.0, -15.0),
-        nalgebra_glm::Vec3::new(-1.5, -2.2, -2.5),
-        nalgebra_glm::Vec3::new(-3.8, -2.0, -12.3),
-        nalgebra_glm::Vec3::new(2.4, -0.4, -3.5),
-        nalgebra_glm::Vec3::new(-1.7, 3.0, -7.5),
-        nalgebra_glm::Vec3::new(1.3, -2.0, -2.5),
-        nalgebra_glm::Vec3::new(1.5, 2.0, -2.5),
-        nalgebra_glm::Vec3::new(1.5, 0.2, -1.5),
-        nalgebra_glm::Vec3::new(-1.3, 1.0, -1.5),
-    ];
-
-    let mut vbo;
-    let mut vao;
+    // let cube_positions = [
+    //     nalgebra_glm::Vec3::new(0.0, 0.0, 0.0),
+    //     nalgebra_glm::Vec3::new(2.0, 5.0, -15.0),
+    //     nalgebra_glm::Vec3::new(-1.5, -2.2, -2.5),
+    //     nalgebra_glm::Vec3::new(-3.8, -2.0, -12.3),
+    //     nalgebra_glm::Vec3::new(2.4, -0.4, -3.5),
+    //     nalgebra_glm::Vec3::new(-1.7, 3.0, -7.5),
+    //     nalgebra_glm::Vec3::new(1.3, -2.0, -2.5),
+    //     nalgebra_glm::Vec3::new(1.5, 2.0, -2.5),
+    //     nalgebra_glm::Vec3::new(1.5, 0.2, -1.5),
+    //     nalgebra_glm::Vec3::new(-1.3, 1.0, -1.5),
+    // ];
+    //
+    // let mut vbo;
+    // let mut vao;
 }
 
 pub unsafe fn transformation_matrices_needed_for_3d() {

@@ -1,3 +1,4 @@
+use bevy::DefaultPlugins;
 use bevy::prelude::{AmbientLight, AssetServer, Color, Commands, DirectionalLight, DirectionalLightBundle, EulerRot, OrthographicProjection, PerspectiveCameraBundle, Plugin, Quat, Query, Res, SpawnSceneCommands, Time, Transform, Vec3, With};
 use crate::App;
 
@@ -6,6 +7,7 @@ pub struct GltfLoadExamplePlugin;
 impl Plugin for GltfLoadExamplePlugin {
     fn build(&self, app: &mut App) {
         app
+            .add_plugins(DefaultPlugins)
             .insert_resource(AmbientLight {
                 color: Color::WHITE,
                 brightness: 1.0 / 5.0f32,

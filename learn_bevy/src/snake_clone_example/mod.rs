@@ -8,6 +8,7 @@ pub struct SnakeClonePlugin;
 impl Plugin for SnakeClonePlugin {
     fn build(&self, app: &mut App) {
         app
+            .add_plugins(DefaultPlugins)
             .insert_resource(ClearColor(Color::rgb(0.04, 0.04, 0.04)))
             .add_startup_system(setup_camera)
             .add_startup_system(spawn_snake)
